@@ -1,0 +1,23 @@
+{
+  "name": "js-todo",
+  "version": "1.0.0",
+  "description": "JavaScript ToDo Aplication (vanilla)",
+  "main": "index.js",
+  "scripts": {
+    "run": "parcel ./src/index,html -p 4000 --open",
+    "bulid": "parcel build ./src/index.html --no--source-maps"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fanbear/js-ToDo.git"
+  },
+  "author": "Yura Belyaev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fanbear/js-ToDo/issues"
+  },
+  "homepage": "https://github.com/fanbear/js-ToDo#readme",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4"
+  }
+}
