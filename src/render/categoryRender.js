@@ -1,5 +1,5 @@
 import { styleCategory, category } from '../data/model';
-import { AddDataBase, GetDataBase } from '../apiServices/firebase'
+import { AddCategoryDataBase, GetDataBase } from '../services/api.servis'
 
 
 //получения данных из инпута и запись нового обьекта в массив
@@ -10,17 +10,19 @@ export class CreateCategoryItem {
 
         this.init();
     }
+
     init () {
         this.$el.addEventListener('submit', this.getValue.bind(this));
     }
+
     getValue(e) {
         e.preventDefault();
 
-        const value = e.target.name.value;
+        const value = e.target.name.value.toLowerCase();
         e.target.name.value = '';
 
         const style = new getColorCategory(styleCategory).randomColor();// получаем цвет категории
-        new AddDataBase('category').add(value, value, style);
+        new AddCategoryDataBase('category').add(value, value, style);
         new GetDataBase('category').getBase();
     }
 }

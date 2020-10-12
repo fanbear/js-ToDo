@@ -131,13 +131,13 @@ var categoryTask = [];
 exports.categoryTask = categoryTask;
 var styleCategory = ['linea-blue', 'linea-lightblue', 'linea-grey', 'linea-lighgrey', 'linea-green', 'linea-orange'];
 exports.styleCategory = styleCategory;
-},{}],"apiServices/firebase.js":[function(require,module,exports) {
+},{}],"services/api.servis.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.GetDataBase = exports.AddDataBase = void 0;
+exports.GetDataBase = exports.AddCategoryDataBase = void 0;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -155,6 +155,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 //     appId: "1:1086182655557:web:c08775b3cb2a22fc5f052c"
 // };
 // Initialize Cloud Firestore through Firebase
+//cloud firebase initialization
 function initDataBase() {
   firebase.initializeApp({
     apiKey: 'AIzaSyAYOEoI1gxCQ9p3Ncj7sIDe9zZeY9DvNHM',
@@ -162,21 +163,21 @@ function initDataBase() {
     projectId: 'asome-todos'
   });
   return firebase.firestore();
-} // add element to dataBase selector = documentName, id = id = name, style = ccs class;
+} // add element to dataBase selector = documentName, id = id = name, style = ccs > class;
 
 
-var AddDataBase = /*#__PURE__*/function () {
-  function AddDataBase(selector) {
-    _classCallCheck(this, AddDataBase);
+var AddCategoryDataBase = /*#__PURE__*/function () {
+  function AddCategoryDataBase(selector) {
+    _classCallCheck(this, AddCategoryDataBase);
 
     this.selector = selector;
   }
 
-  _createClass(AddDataBase, [{
+  _createClass(AddCategoryDataBase, [{
     key: "add",
     value: function add(name, ident, style) {
       var category = db.collection(this.selector);
-      category.doc(this.selector).set({
+      category.doc(name).set({
         id: ident,
         name: name,
         style: style
@@ -184,10 +185,11 @@ var AddDataBase = /*#__PURE__*/function () {
     }
   }]);
 
-  return AddDataBase;
-}();
+  return AddCategoryDataBase;
+}(); //get element from dataBase || get all doc
 
-exports.AddDataBase = AddDataBase;
+
+exports.AddCategoryDataBase = AddCategoryDataBase;
 
 var GetDataBase = /*#__PURE__*/function () {
   function GetDataBase(selector) {
@@ -198,18 +200,29 @@ var GetDataBase = /*#__PURE__*/function () {
 
   _createClass(GetDataBase, [{
     key: "getBase",
-    value: function getBase() {
-      var getting = db.collection(this.selector).doc(this.selector);
-      getting.get().then(function (doc) {
-        if (doc.exists) {
-          console.log("Document data:", doc.data());
-        } else {
-          // doc.data() will be undefined in this case
-          console.log("No such document!");
-        }
-      }).catch(function (error) {
-        console.log("Error getting document:", error);
-      });
+    value: function getBase(docName) {
+      var data = [];
+
+      if (!docName) {
+        db.collection(this.selector).get().then(function (querySnapshot) {
+          querySnapshot.forEach(function (doc) {
+            return data.push(doc.data());
+          });
+        });
+      } else {
+        db.collection(this.selector).doc(docName).get().then(function (doc) {
+          if (doc.exists) {
+            oneDoc.push(doc.data());
+          } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+          }
+        }).catch(function (error) {
+          console.log("Error getting document:", error);
+        });
+      }
+
+      console.log(data);
     }
   }]);
 
@@ -228,7 +241,7 @@ exports.CreateCategoryItem = void 0;
 
 var _model = require("../data/model");
 
-var _firebase = require("../apiServices/firebase");
+var _api = require("../services/api.servis");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -255,12 +268,12 @@ var CreateCategoryItem = /*#__PURE__*/function () {
     key: "getValue",
     value: function getValue(e) {
       e.preventDefault();
-      var value = e.target.name.value;
+      var value = e.target.name.value.toLowerCase();
       e.target.name.value = '';
       var style = new getColorCategory(_model.styleCategory).randomColor(); // получаем цвет категории
 
-      new _firebase.AddDataBase('category').add(value, value, style);
-      new _firebase.GetDataBase('category').getBase();
+      new _api.AddCategoryDataBase('category').add(value, value, style);
+      new _api.GetDataBase('category').getBase();
     }
   }]);
 
@@ -293,17 +306,16 @@ var getColorCategory = /*#__PURE__*/function () {
 }();
 
 new CreateCategoryItem('.add-category'); //создаем новую категорию
-},{"../data/model":"data/model.js","../apiServices/firebase":"apiServices/firebase.js"}],"index.js":[function(require,module,exports) {
+},{"../data/model":"data/model.js","../services/api.servis":"services/api.servis.js"}],"index.js":[function(require,module,exports) {
 'use strict';
 
 require("./render/categoryRender");
 
-require("./apiServices/firebase");
+require("./services/api.servis");
 
-var $taskCategory = document.querySelector('.category-wrapper');
-var $btnCategory = document.querySelector('.btn-category'); //  add .active class in task category
+var $taskCategory = document.querySelector('.category-wrapper'); //  add .active class in task category
 
-function showCategory(event) {
+function selectedCategory(event) {
   var target = event.target;
   document.querySelectorAll('.category-wrapper_item').forEach(function (item) {
     return item.classList.remove('active');
@@ -314,8 +326,8 @@ function showCategory(event) {
   }
 }
 
-$taskCategory.addEventListener('click', showCategory);
-},{"./render/categoryRender":"render/categoryRender.js","./apiServices/firebase":"apiServices/firebase.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+$taskCategory.addEventListener('click', selectedCategory);
+},{"./render/categoryRender":"render/categoryRender.js","./services/api.servis":"services/api.servis.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -343,7 +355,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63147" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58488" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
