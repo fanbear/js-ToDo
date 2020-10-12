@@ -1,10 +1,11 @@
 'use strict'
 
-import { category } from './data/model';
-import { RenderCategory, get} from './render/categoryRender';
+import './render/categoryRender';
+import './apiServices/firebase';
 
 const $taskCategory = document.querySelector('.category-wrapper');
 const $btnCategory = document.querySelector('.btn-category');
+
 
 
 //  add .active class in task category

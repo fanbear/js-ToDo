@@ -131,15 +131,104 @@ var categoryTask = [];
 exports.categoryTask = categoryTask;
 var styleCategory = ['linea-blue', 'linea-lightblue', 'linea-grey', 'linea-lighgrey', 'linea-green', 'linea-orange'];
 exports.styleCategory = styleCategory;
+},{}],"apiServices/firebase.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.GetDataBase = exports.AddDataBase = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+// var firebaseConfig = {
+//     apiKey: "AIzaSyAYOEoI1gxCQ9p3Ncj7sIDe9zZeY9DvNHM",
+//     authDomain: "asome-todos.firebaseapp.com",
+//     databaseURL: "https://asome-todos.firebaseio.com",
+//     projectId: "asome-todos",
+//     storageBucket: "asome-todos.appspot.com",
+//     messagingSenderId: "1086182655557",
+//     appId: "1:1086182655557:web:c08775b3cb2a22fc5f052c"
+// };
+// Initialize Cloud Firestore through Firebase
+function initDataBase() {
+  firebase.initializeApp({
+    apiKey: 'AIzaSyAYOEoI1gxCQ9p3Ncj7sIDe9zZeY9DvNHM',
+    authDomain: 'asome-todos.firebaseapp.com',
+    projectId: 'asome-todos'
+  });
+  return firebase.firestore();
+} // add element to dataBase selector = documentName, id = id = name, style = ccs class;
+
+
+var AddDataBase = /*#__PURE__*/function () {
+  function AddDataBase(selector) {
+    _classCallCheck(this, AddDataBase);
+
+    this.selector = selector;
+  }
+
+  _createClass(AddDataBase, [{
+    key: "add",
+    value: function add(name, ident, style) {
+      var category = db.collection(this.selector);
+      category.doc(this.selector).set({
+        id: ident,
+        name: name,
+        style: style
+      });
+    }
+  }]);
+
+  return AddDataBase;
+}();
+
+exports.AddDataBase = AddDataBase;
+
+var GetDataBase = /*#__PURE__*/function () {
+  function GetDataBase(selector) {
+    _classCallCheck(this, GetDataBase);
+
+    this.selector = selector;
+  }
+
+  _createClass(GetDataBase, [{
+    key: "getBase",
+    value: function getBase() {
+      var getting = db.collection(this.selector).doc(this.selector);
+      getting.get().then(function (doc) {
+        if (doc.exists) {
+          console.log("Document data:", doc.data());
+        } else {
+          // doc.data() will be undefined in this case
+          console.log("No such document!");
+        }
+      }).catch(function (error) {
+        console.log("Error getting document:", error);
+      });
+    }
+  }]);
+
+  return GetDataBase;
+}();
+
+exports.GetDataBase = GetDataBase;
+var db = initDataBase();
 },{}],"render/categoryRender.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.RenderCategory = exports.CreateCategoryItem = void 0;
+exports.CreateCategoryItem = void 0;
 
 var _model = require("../data/model");
+
+var _firebase = require("../apiServices/firebase");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -170,39 +259,16 @@ var CreateCategoryItem = /*#__PURE__*/function () {
       e.target.name.value = '';
       var style = new getColorCategory(_model.styleCategory).randomColor(); // получаем цвет категории
 
-      var item = new NewCategoryTask(value, style);
-
-      _model.category.push(item);
-
-      update();
+      new _firebase.AddDataBase('category').add(value, value, style);
+      new _firebase.GetDataBase('category').getBase();
     }
   }]);
 
   return CreateCategoryItem;
-}(); //Шаблон нового таска
+}(); //Цвет категории
 
 
 exports.CreateCategoryItem = CreateCategoryItem;
-
-var NewCategoryTask = /*#__PURE__*/function () {
-  function NewCategoryTask(props, style) {
-    _classCallCheck(this, NewCategoryTask);
-
-    this.id = props;
-    this.name = props;
-    this.style = style;
-  }
-
-  _createClass(NewCategoryTask, [{
-    key: "categoryItem",
-    value: function categoryItem(content) {
-      return "<div class=\"category-wrapper_item ".concat(content.style, "\" data-name=\"").concat(content.id, "\" data-active=\"\" >").concat(content.name, "</div>");
-    }
-  }]);
-
-  return NewCategoryTask;
-}(); //Цвет категории
-
 
 var getColorCategory = /*#__PURE__*/function () {
   function getColorCategory(style) {
@@ -224,46 +290,15 @@ var getColorCategory = /*#__PURE__*/function () {
   }]);
 
   return getColorCategory;
-}(); //рендер категорий
-
-
-var RenderCategory = /*#__PURE__*/function () {
-  function RenderCategory(selector) {
-    _classCallCheck(this, RenderCategory);
-
-    this.$el = document.querySelector(selector);
-  }
-
-  _createClass(RenderCategory, [{
-    key: "toHTML",
-    value: function toHTML(model) {
-      var src = '';
-      model.forEach(function (element) {
-        var item = new NewCategoryTask();
-        src += item.categoryItem(element);
-        return src;
-      });
-      this.$el.textContent = '';
-      this.$el.insertAdjacentHTML('afterbegin', src);
-    }
-  }]);
-
-  return RenderCategory;
 }();
 
-exports.RenderCategory = RenderCategory;
 new CreateCategoryItem('.add-category'); //создаем новую категорию
-///обновляем категории после создания или удаления
-
-function update() {
-  new RenderCategory('.category-wrapper').toHTML(_model.category);
-}
-},{"../data/model":"data/model.js"}],"index.js":[function(require,module,exports) {
+},{"../data/model":"data/model.js","../apiServices/firebase":"apiServices/firebase.js"}],"index.js":[function(require,module,exports) {
 'use strict';
 
-var _model = require("./data/model");
+require("./render/categoryRender");
 
-var _categoryRender = require("./render/categoryRender");
+require("./apiServices/firebase");
 
 var $taskCategory = document.querySelector('.category-wrapper');
 var $btnCategory = document.querySelector('.btn-category'); //  add .active class in task category
@@ -280,7 +315,7 @@ function showCategory(event) {
 }
 
 $taskCategory.addEventListener('click', showCategory);
-},{"./data/model":"data/model.js","./render/categoryRender":"render/categoryRender.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./render/categoryRender":"render/categoryRender.js","./apiServices/firebase":"apiServices/firebase.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -308,7 +343,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59873" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63147" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

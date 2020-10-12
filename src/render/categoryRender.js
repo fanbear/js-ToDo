@@ -1,4 +1,5 @@
 import { styleCategory, category } from '../data/model';
+import { AddDataBase, GetDataBase } from '../apiServices/firebase'
 
 
 //получения данных из инпута и запись нового обьекта в массив
@@ -19,23 +20,11 @@ export class CreateCategoryItem {
         e.target.name.value = '';
 
         const style = new getColorCategory(styleCategory).randomColor();// получаем цвет категории
-        const item = new NewCategoryTask(value, style);
-        category.push(item); 
-        update();     
+        new AddDataBase('category').add(value, value, style);
+        new GetDataBase('category').getBase();
     }
 }
 
-//Шаблон нового таска
-class NewCategoryTask {
-    constructor(props, style) {
-            this.id = props;
-            this.name = props;
-            this.style = style
-    }
-    categoryItem(content) {
-        return `<div class="category-wrapper_item ${content.style}" data-name="${content.id}" data-active="" >${content.name}</div>`
-    }
-}
 //Цвет категории
 class getColorCategory {
     constructor(style){
@@ -51,30 +40,5 @@ class getColorCategory {
     }
 }
 
-//рендер категорий
-export class RenderCategory {
-    constructor(selector) {
-        this.$el = document.querySelector(selector);
-    }
-
-    toHTML(model) {
-        let src = '';
-        model.forEach(element => {
-            const item = new NewCategoryTask;
-            src += item.categoryItem(element);
-            return src;
-        });
-        this.$el.textContent = '';
-        this.$el.insertAdjacentHTML('afterbegin', src);
-        
-    }
-
-}
-
-
 new CreateCategoryItem('.add-category') //создаем новую категорию
 
-///обновляем категории после создания или удаления
-function update() {
-    new RenderCategory('.category-wrapper').toHTML(category);
-}
